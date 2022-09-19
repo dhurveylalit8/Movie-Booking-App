@@ -22,6 +22,8 @@ db.once("open", () => {
 
 require("./routes/movie.route")(app);
 require("./routes/theatre.route")(app);
+require("./routes/auth.route")(app);
+require("./routes/user.route")(app);
 
 app.listen(serverConfig.PORT, () => {
     console.log(`#### Connected to server at port no : ${serverConfig.PORT}  ####`);

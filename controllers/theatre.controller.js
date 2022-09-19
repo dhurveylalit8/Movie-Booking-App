@@ -1,10 +1,12 @@
 const Theatre = require("../models/theatre.model");
-const Movie = require("../models/movie.model")
-const constants = require("../utils/constant")
+const Movie = require("../models/movie.model");
+const User = require("../models/user.model")
+const constants = require("../utils/constant");
 
 exports.createNewTheatre = async (req, res) => {
     try{
         const data = {
+            onwerId : req.user.userType == constants.userType.admin ? req.body.onwerId : req.user._id,
             name : req.body.name,
             description : req.body.description,
             city : req.body.city,
@@ -13,6 +15,9 @@ exports.createNewTheatre = async (req, res) => {
             numberOfSeats : req.body.numberOfSeats,
         }
         const theatre = await Theatre.create(data);
+        const theatreOwner = await User.findOne({_id : theatre.ownerId});
+        theatreOwner.theatreOwned.push(theatre._id);
+        await theatreOwner.save();
 
         console.log(`#### New theatre ${theatre.name} created ####`);
         res.status(201).send(theatre);
@@ -51,7 +56,10 @@ exports.editTheatre = async (req, res) => {
 
 exports.deleteTheatre = async (req, res) => {
     try{
-        const theatre = await Theatre.findOne({_id : req.params.id});
+        const theatre = req.theatreInParams;
+        const theatreOwner = await User.findOne({_id : theatre.onwerId});
+        await theatreOwner.theatreOwned.remove(theatre._id);
+        await theatreOwner.save();
 
         await theatre.remove();
 
@@ -95,9 +103,8 @@ exports.getSingleTheatre = async (req, res) => {
 
 exports.getMoviesInTheatre = async (req, res) => {
     try{
-        const theatre = await Theatre.findOne({_id : req.params.id});
 
-        const movies = await Movie.find({_id : theatre.movies})
+        const movies = await Movie.find({_id : req.theatreInParams.movies});
 
         res.status(200).send(movies)
 
@@ -111,39 +118,34 @@ exports.getMoviesInTheatre = async (req, res) => {
 
 exports.editMoviesInTheatre = async (req, res) => {
     try{
-        const theatre = await Theatre.findOne({_id : req.params.id});
+        const theatre = req.theatreInParams;
 
         if(req.body.addMovies){
-            req.body.addMovies.forEach(movie => {
-                theatre.movies.push(movie)
-            })
-            req.body.addMovies.forEach(async (movie) => {
-                let temp = await Movie.findOne({_id : movie})
-                temp.theatres.push(theatre.id);
+            for(e of req.body.addMovies){
+                theatre.movies.push(e);
+                let temp = await Movie.findOne({_id : e})
+                temp.theatres.push(theatre._id);
                 await temp.save();
-            })
-    }
+            }
+        }
 
         if(req.body.removeMovies){
-            req.body.removeMovies.forEach(async (movie) => {
-                await theatre.movies.remove(movie)
-            })
-            req.body.removeMovies.forEach(async (movie) => {
-                let temp = await Movie.findOne({_id : movie})
-                await temp .theatres.remove(theatre._id);
+            for(e of req.body.removeMovies){
+                await theatre.movies.remove(e);
+                let temp = await Movie.findOne({_id : e})
+                await temp.theatres.remove(theatre._id);
                 await temp.save();
-            })
-    }
+            }
+        }
 
         await theatre.save();
-        res.status(200).send({message : "Updated movies in theatre"})
+        res.status(200).send({message : "Updated movies in theatre"});
 
-    
-    }catch(err){
-        console.log("#### Error while updating the movies in theatre ####", err.message);
+    }catch{
+        console.log("#### Error while updating the movies in theatre ####");
         res.status(500).send({
             message : "Internal server error while updating the movies in theatre"
-        })
+            })
     }
 }
 

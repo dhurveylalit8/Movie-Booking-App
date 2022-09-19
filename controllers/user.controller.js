@@ -2,25 +2,26 @@ const User = require("../models/user.model");
 const objectConverter = require("../utils/objectConverter");
 const bcrypt = require("bcryptjs");
 const constants = require("../utils/constant");
-const { userStatus, userType } = require("../utils/constant");
+// const { userStatus, userType } = require("../utils/constant");
 
 exports.findAll = async (req, res) =>{
 
     const queryObj = {};
-    const userTypeQP = req.queryObj.userTypeQP;
-    const userStatusQP = req.queryObj.userStatusQP;
+    const userTypeQP = req.query.userType;
+    const userStatusQP = req.query.userStatus;
 
     if(userTypeQP){
-        queryObj.userTypeQP = userTypeQP
+        queryObj.userType = userTypeQP
     }
     if(userStatusQP){
-        queryObj.userStatusQP = userStatusQP
+        queryObj.userStatus = userStatusQP
     }
 
     try{
         const users = await User.find(queryObj);
 
         res.status(200).send(objectConverter.multipleUserResponse(users));
+
     }catch(err){
         console.log("#### Error while fetching all users data ####", err.message);
         res.status(500).send({
@@ -49,7 +50,7 @@ exports.updateUser = async (req, res) => {
         const user = req.userInParams;
 
         user.name = req.body.name ? req.body.name : user.name
-        user.password = req.body.password ? req.body.password : user.password
+        user.password = req.body.password ? bcrypt.hashSync(req.body.password, 8) : user.password
         user.email = req.body.email ? req.body.email : user.email
 
         if(req.user.userType == constants.userType.admin){
