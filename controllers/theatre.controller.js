@@ -24,7 +24,7 @@ exports.createNewTheatre = async (req, res) => {
 
     }catch(err){
         console.log("#### Error while creating a theatre ####", err.message)
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal server error while creating a new theatre"
         });
     }
@@ -48,7 +48,7 @@ exports.editTheatre = async (req, res) => {
 
     }catch(err){
         console.log("#### Error while updating theatre ####", err.message)
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal server error while updating the theatre"
         });
     }
@@ -68,7 +68,7 @@ exports.deleteTheatre = async (req, res) => {
 
     }catch(err){
         console.log("#### Error while deleting the theatre ####", err.message)
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal server error while deleting the theatre"
         })
     }
@@ -82,7 +82,7 @@ exports.getAllTheatres = async (req, res) => {
 
     }catch(err){
         console.log("#### Error while getting all the theatres ####", err.message)
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal server error while getting all the theatres"
         })
     }
@@ -93,9 +93,10 @@ exports.getSingleTheatre = async (req, res) => {
         const theatre = await Theatre.findOne({_id : req.params.id});
 
         res.status(200).send(theatre);
+
     }catch(err){
         console.log("#### Error while getting the single theatre ####", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal server error while getting the single theatre"
         });
     }
@@ -110,7 +111,7 @@ exports.getMoviesInTheatre = async (req, res) => {
 
     }catch(err){
         console.log("#### Error while getting the movies in theatre ####", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal server error while getting the movies in theatre"
         })
     }
@@ -141,11 +142,11 @@ exports.editMoviesInTheatre = async (req, res) => {
         await theatre.save();
         res.status(200).send({message : "Updated movies in theatre"});
 
-    }catch{
+    }catch(err){
         console.log("#### Error while updating the movies in theatre ####");
         res.status(500).send({
             message : "Internal server error while updating the movies in theatre"
-            })
+        })
     }
 }
 

@@ -2,7 +2,6 @@ const User = require("../models/user.model");
 const objectConverter = require("../utils/objectConverter");
 const bcrypt = require("bcryptjs");
 const constants = require("../utils/constant");
-// const { userStatus, userType } = require("../utils/constant");
 
 exports.findAll = async (req, res) =>{
 
@@ -24,7 +23,7 @@ exports.findAll = async (req, res) =>{
 
     }catch(err){
         console.log("#### Error while fetching all users data ####", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal server error while fetching all users data"
         })
     }
@@ -38,7 +37,7 @@ exports.findByUserId = async (req, res) => {
 
     }catch(err){
         console.log("#### Error while searching for the user ####", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal server error while fetching data"
         })
     }
@@ -65,7 +64,7 @@ exports.updateUser = async (req, res) => {
 
     }catch(err){
         console.log("#### Error while updating user data ####", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal error while updating user data"
         })
     }

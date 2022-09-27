@@ -1,6 +1,11 @@
 const User = require("../models/user.model");
 const Movie = require("../models/movie.model");
 const Theatre = require("../models/theatre.model");
+const Booking = require("../models/booking.model");
+const Payment = require("../models/payment.model");
+
+const jwt = require("jsonwebtoken");
+const ObjectId = require("mongoose").Types.ObjectId
 
 const userInParams = async (req, res, next) => {
     try{
@@ -64,10 +69,80 @@ const movieInParams = async (req, res, next) => {
     }
 }
 
+const bookingInParams = async (req, res, next) => {
+    try{
+
+        if(!ObjectId.isValid(req.params.id)){
+            return res.status(400).send({
+                message : "Booking id is not valid Obj Id"
+            })
+        }
+
+        const booking = await Booking.findOne({
+            _id : req.params.id
+        });
+
+        if(!booking){
+            return res.status(400).send({
+                message : "Booking ID provided is not a valid one"
+            })
+        }
+
+        req.bookingInParams = booking;
+        next();
+    }catch(err){
+        console.log("error while validating booking id", err.message);
+
+        return res.status(500).send({
+            message : "Internal error while validating booking id"
+        })
+    }
+}
+
+const paymentInParams = async(req, res, next) => {
+    try{
+        const payment = await Payment.findOne({_id:req.params.id});
+
+        if(!payment){
+            return res.status(400).send({
+                message : "Payment Id passed doesn't exist"
+            })
+        }
+        req.paymentInParams = payment;
+        next();
+    }catch(err){
+        console.log("#### Error while reading the payment info ####", err.message);
+        return res.status(500).send({
+            message : "Interanal error while reading the payment info"
+        })
+    }
+}
+
+const verifyRefreshToken = async (req, res, next) => {
+    jwt.verify(req.params.refreshToken, authConfig.secret, async(err, decoded)=>{
+        if(err){
+            return res.status(401).send({
+                message : "Unauthorized"
+            })
+        }
+        const user = await User.findOne({userId : decoded.id});
+        if(!user){
+            return res.status(400).send({
+                message : "The user that this token belongs to doesn't exist"
+            })
+        }
+        req.user = user;
+        next();
+    })
+}
+
 const validateIdInParams = {
     userInParams,
     theatreInParams,
-    movieInParams
+    movieInParams,
+    bookingInParams,
+    paymentInParams,
+    verifyRefreshToken
 }
 
 module.exports = validateIdInParams;

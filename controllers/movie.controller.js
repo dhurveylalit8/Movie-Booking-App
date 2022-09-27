@@ -23,7 +23,7 @@ exports.createNewMovie = async (req, res) => {
 
     }catch(err){
         console.log("#### Error while creating a new movie", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal server error while creating a new movie"
         });
     }
@@ -50,7 +50,7 @@ exports.editMovie = async (req, res) => {
         res.status(200).send(updatedMovie);
     }catch(err){
         console.log("#### Error while updating movie data ####", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal server error while updating movie data"
         });
     }
@@ -75,7 +75,7 @@ exports.deleteMovie = async (req,res) => {
 
     }catch(err){
         console.log("#### Error while deleting movie data ####", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal server error while deleting movie"
         });
     }
@@ -89,7 +89,7 @@ exports.getAllMovies = async (req,res) => {
 
     }catch(err){
         console.log("#### Error while getting all the movies ####", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal server error while getting all the mvoies"
         });
     }
@@ -103,7 +103,7 @@ exports.getSingleMovie = async (req,res) => {
 
     }catch(err){
         console.log("#### Error while getting the single movie ####", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal error while getting the single movie"
         });
     }

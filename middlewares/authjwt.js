@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const authConfig = require("../configs/auth.config");
 const User = require("../models/user.model");
+const Booking = require("../models/booking.model")
 const constants = require("../utils/constant");
 
 const verifyToken = async (req, res, next) => {
@@ -93,8 +94,48 @@ const isValidTheatreOwner = async (req, res, next) => {
         next();
     }catch(err){
         console.log("#### Error while authenticating the user info ####", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message : "Internal server error while authenticating the user data"
+        })
+    }
+}
+
+const isAdminOrOwnerOfBooking = async (req, res, next) => {
+
+    try{
+
+        if(req.user.userType != constants.userType.admin){
+            if(req.bookingInParams.userId.valueOf() != req.userInParams._id.valueOf()){
+                return res.status(400).send({
+                    message : "Only the owner of the booking/admin has access to this operation"
+                })
+            }
+        }
+
+        next();
+    }catch(err){
+        console.log("Error while validating userType is admin/ownerOfBooking", err.message);
+        return res.status(500).send({
+            message : "Internal server error while validating userType is admin/ownerOfBooking"
+        })
+    }
+}
+
+
+const isAdminOrOwnerOfPayment = async(req, res, next) => {
+    try{
+
+        if(req.user.userType == constants.userType.admin && !req.user.myPayments.includes(req.params.id)){
+            return res.status(400).send({
+                message : "Only the owner of the payment/admin has access to this operation"
+            })
+        }
+
+        next();
+    }catch(err){
+        console.log("Error while validating userType is admin/ownerOfPayment", err.message);
+        return res.status(500).send({
+            message : "Internal server error while validating userType is admin/ownerOfPayment"
         })
     }
 }
@@ -105,7 +146,9 @@ const authJwt = {
     isAdmin,
     isAdminOrOwner,
     isTheatreOwnerOrAdmin,
-    isValidTheatreOwner
+    isValidTheatreOwner,
+    isAdminOrOwnerOfBooking,
+    isAdminOrOwnerOfPayment
 }
 
 module.exports = authJwt

@@ -1,14 +1,64 @@
 const Movie = require("./models/movie.model");
 const Theatre = require("./models/theatre.model")
 const constants = require("./utils/constant")
+const User = require("./models/user.model");
+const Booking = require("./models/booking.model");
+const Payment = require("./models/payment.model");
+const bcrypt = require('bcryptjs');
 
 module.exports = async () => {
     try{
+
+        await User.collection.drop();
+        console.log("#### User collection dropped####")
+
+        await Booking.collection.drop();
+        console.log("#### Booking collection drop ####")
+
+        await Payment.collection.drop();
+        console.log("#### Payment collection drop ####")
+
         await Movie.collection.drop();
         console.log("#### Movie collection dropped ####")
         
         await Theatre.collection.drop();
         console.log("#### Theatre collection dropped ####")
+
+
+        await User.create({
+            name : "Lalit",
+            userId : "admin",
+            password : bcrypt.hashSync("AdminOfTheApp@123", 8),
+            email : "Lalit@admin.com",
+            userType : constants.userType.admin
+        });
+
+        console.log("#### Admin user created ####")
+
+        const users = [];
+        users[0] = {
+            name : "Lalit Customer",
+            userId : "customer1",
+            password : bcrypt.hashSync("customer@1", 8),
+            email : "lalit@customer.com",
+            userType : constants.userType.customer
+        },
+        users[1] = {
+            name : "Theatre Owner 1",
+            userId : "theatreOwner1",
+            password : bcrypt.hashSync("TheatreOwner@1", 8),
+            email : "theatreOwner1@app.com",
+            userType : constants.userType.theatre_owner
+        },
+        users[0] = {
+            name : "Theatre Owner 2",
+            userId : "theatreOwner2",
+            password : bcrypt.hashSync("TheatreOwner@2", 8),
+            email : "theatreOwner@app.com",
+            userType : constants.userType.theatre_owner
+        }
+
+        userCreated = await User.insertMany(users);
 
         const theatres = [];
         theatres[0] = {
@@ -37,6 +87,10 @@ module.exports = async () => {
         }
 
         const theatresCreated = await Theatre.insertMany(theatres);
+        await usersCreated[1].theatresOwned.push(theatresCreated[0]._id);
+        await usersCreated[2].theatresOwned.push(theatresCreated[1]._id, theatresCreated[2]._id);
+        await usersCreated[1].save();
+        await usersCreated[2].save();
 
         const movies = [];
         movies[0] = {
@@ -87,6 +141,34 @@ module.exports = async () => {
         theatresCreated[0].save();
         moviesCreated[0].save();
         moviesCreated[1].save();
+
+        const booking = await Booking.create({
+            totalCost : 200,
+            theatreId : theatresCreated[0]._id,
+            movieId :moviesCreated[0]._id,
+            userId : userCreated[0]._id,
+            noOfSeats : 2,
+            ticketBookedTime : Date.now(),
+            status : constants.bookingStatuses.completed
+        });
+
+        console.log("booking : ---------", booking);
+
+        await usersCreated[0].myBookings.push(booking._id)
+        await moviesCreated[0].bookings.push(booking._id)
+
+        await usersCreated[0].save();
+        await theatresCreated[0].save();
+        await moviesCreated[0].save();
+
+        const payment = await Payment.create({
+            bookingId : booking._id,
+            amount : 200,
+            status : constants.paymentStatuses.success
+        })
+
+        await userCreated[0].myPayment.push(payment._id);
+        await userCreated[0].save();
         
         console.log("#### Seed data intialized ####")
         
