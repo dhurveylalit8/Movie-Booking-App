@@ -1,5 +1,5 @@
 const paymentController = require("../controllers/payment.controller");
-const {authJwt, validateIdInParams, validatePaymentRequestBody, validatePaymentRequestbody} = require("../middlewares");
+const {authJwt, validateIdInParams, validatePaymentRequestbody} = require("../middlewares");
 
 module.exports = (app) => {
 
