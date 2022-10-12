@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-
-# Movie Booking Application
-
-This project is node.js back-end code for a movie booking application that can create various entities like users, movies, theatres, bookings and payments as well as perform various actions on them.
-=======
 # Movie Booking application
 This project is node.js back-end code for a movie booking application that can create various entities like users, movies, theatres, bookings and payments as well as perform various actions on them.
 
@@ -166,4 +160,3 @@ Any user can get a single payment by paymentId<br/><br/>
 - **Get all payments**<br/>
 `GET /mba/api/v1/payments`<br/>
 Any user can get a list of all their payments<br/><br/>
->>>>>>> f6a976b6a686cc47705729a972a4e8ed7683c97a
